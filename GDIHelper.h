@@ -1,4 +1,5 @@
 #pragma once
+//윈도우 화면 그리는 함수
 
 extern ULONG g_CurrentColor;
 extern BYTE *g_pBits;

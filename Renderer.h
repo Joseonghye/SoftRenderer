@@ -1,3 +1,3 @@
 #pragma once
 
-void UpdateFrame(void);
+void UpdateFrame(void);	//Rendering Frame = Unity Update

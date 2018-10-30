@@ -27,3 +27,9 @@
 
 #define FORCEINLINE __forceinline	
 
+//inLine 함수를 호출할때 점프 하는 것이 아니기에 속도가 빠르다 (가볍게만 사용해야함) 
+FORCEINLINE float Deg2Rad(float degree)
+{
+	return degree * PI / 180.0f;
+}
+
