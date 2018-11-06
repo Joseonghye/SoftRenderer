@@ -25,6 +25,12 @@
     <Filter Include="App">
       <UniqueIdentifier>{0d6601b9-2612-4bec-a657-0fa5a68b8b21}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Math\Matrix">
+      <UniqueIdentifier>{f674dfb2-e23c-41d1-a8b2-637c21426b7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Vector">
+      <UniqueIdentifier>{571053ad-4e94-40ce-8cdd-bc6def672207}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -45,20 +51,26 @@
     <ClInclude Include="SoftRenderer.h">
       <Filter>App</Filter>
     </ClInclude>
-    <ClInclude Include="Vector2.h">
-      <Filter>Math</Filter>
-    </ClInclude>
-    <ClInclude Include="Vector.h">
-      <Filter>Math</Filter>
-    </ClInclude>
     <ClInclude Include="IntPoint.h">
       <Filter>Math</Filter>
     </ClInclude>
     <ClInclude Include="Matrix.h">
-      <Filter>Math</Filter>
+      <Filter>Math\Matrix</Filter>
     </ClInclude>
     <ClInclude Include="Matrix2.h">
-      <Filter>Math</Filter>
+      <Filter>Math\Matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="Matrix3.h">
+      <Filter>Math\Matrix</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector.h">
+      <Filter>Math\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2.h">
+      <Filter>Math\Vector</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector3.h">
+      <Filter>Math\Vector</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -74,11 +86,17 @@
     <ClCompile Include="SoftRenderer.cpp">
       <Filter>App</Filter>
     </ClCompile>
-    <ClCompile Include="Vector2.cpp">
-      <Filter>Math</Filter>
-    </ClCompile>
     <ClCompile Include="Matrix2.cpp">
-      <Filter>Math</Filter>
+      <Filter>Math\Matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="Matrix3.cpp">
+      <Filter>Math\Matrix</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector2.cpp">
+      <Filter>Math\Vector</Filter>
+    </ClCompile>
+    <ClCompile Include="Vector3.cpp">
+      <Filter>Math\Vector</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

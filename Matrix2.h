@@ -34,5 +34,13 @@ public:
 		_22 = cosf(radian);
 	}
 
+	//¿ªÇà·Ä 
+	void Transpose()
+	{
+		float __12 = _12;
+		_12 = _21;
+		_21 = __12;
+	}
+
 	Matrix2 operator* (const Matrix2& Mat) const;
 };
