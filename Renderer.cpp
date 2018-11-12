@@ -29,6 +29,29 @@ void PutPixel(int x, int y)
 	*(dest + offset) = g_CurrentColor;
 }
 
+void DrawQuad(Vector3 center,int nradius, Matrix3 TRS)
+{
+	for (int i = -nradius+center.X ; i <= nradius + center.X; i++)
+	{
+		for (int j = -nradius+center.Y; j <= nradius+center.Y; j++)
+		{
+			PutPixel(Vector3((float)i, (float)j) * TRS);
+		}
+	}
+}
+
+void DrawCircle(Vector3 center, int nradius, Matrix3 TRS)
+{
+	for (int i = -nradius + center.X; i <= nradius + center.X; i++)
+	{
+		for (int j = -nradius + center.Y; j <= nradius + center.Y; j++)
+		{
+			Vector3 vec((float)i, (float)j);
+			if(Vector3::DistSquared(center, vec)<= nradius*nradius)
+			PutPixel(Vector3((float)i, (float)j) * TRS);
+		}
+	}
+}
 
 void UpdateFrame(void)
 {
@@ -37,7 +60,8 @@ void UpdateFrame(void)
 	Clear();
 
 	// Draw
-	SetColor(255, 0, 0);
+
+
 
 	// Draw a filled circle with radius 100
 	Vector3 center(0.0f, 0.0f);
@@ -65,6 +89,37 @@ void UpdateFrame(void)
 	Matrix3 SR = scaleMat * rotMat;
 	Matrix3 TRS = translationMat * rotMat * scaleMat;
 
+	
+	static float g = 0;
+	g++;
+	g = fmodf(g, 225);
+	SetColor(255, g, 0);
+	DrawQuad(center,nradius, TRS);
+
+	Matrix3 mat; 
+	mat.SetTranslation(0, 0);
+
+	static float de = 360.0f;
+	de -= 0.2f;
+	de = fmodf(de, 360);
+	Matrix3 rotM; rotM.SetRotation(de);
+
+	static float b = 255;
+	b --;
+	b = fmodf(b, 255);
+	SetColor(0, g, b);
+	center = Vector3(120, 120);
+	DrawCircle(center, 10, TRS*mat*rotM);
+
+	center = Vector3(140, 140);
+	
+	static float d = 0;
+	d += 0.5f;
+	d = fmodf(d, 360.0f);
+	Matrix3 rot; rot.SetRotation(d);
+	DrawQuad(center, 2, TRS * mat*rot);
+
+	/*
 	for (int i = -nradius; i <= nradius; i++)
 	{
 		for (int j = -nradius; j <= nradius; j++)
@@ -72,7 +127,7 @@ void UpdateFrame(void)
 			PutPixel(Vector3((float)i, (float)j) * TRS);
 		}
 	}
-
+	*/
 	// Buffer Swap 
 	BufferSwap();
 }
