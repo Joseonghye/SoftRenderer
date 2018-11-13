@@ -1,4 +1,3 @@
-
 #include "stdafx.h"
 #include "SoftRenderer.h"
 #include "GDIHelper.h"
@@ -29,26 +28,66 @@ void PutPixel(int x, int y)
 	*(dest + offset) = g_CurrentColor;
 }
 
-void DrawQuad(Vector3 center,int nradius, Matrix3 TRS)
+void DrawLine(const Vector3& start, const Vector3& end, const Matrix3 &mat)
 {
-	for (int i = -nradius+center.X ; i <= nradius + center.X; i++)
+
+	//L = (1-t)P + tQ ,  0 <= t <= 1
+	float length = Vector3::Dist(end, start);
+	float inc = 1.0f / length;
+	int nLength = (int)(length+1);
+	for (int i = 0; i <= nLength; i++)
 	{
-		for (int j = -nradius+center.Y; j <= nradius+center.Y; j++)
-		{
-			PutPixel(Vector3((float)i, (float)j) * TRS);
-		}
+		float t = inc*i;
+		if (t >= length) t = 1.0f;
+		Vector3 pt = start * (1.0f - t) + end *t;
+		PutPixel(IntPoint(pt));
 	}
 }
 
-void DrawCircle(Vector3 center, int nradius, Matrix3 TRS)
+void DrawTriangle(const Vector3&p1, const Vector3& p2, const Vector3&p3)
 {
-	for (int i = -nradius + center.X; i <= nradius + center.X; i++)
+	Vector2 minPos = Vector2(INFINITY, INFINITY);
+	Vector2 maxPos = Vector2(-INFINITY, -INFINITY);
+
+	if (p1.X < minPos.X) minPos.X = p1.X;
+	if (p1.Y < minPos.Y) minPos.Y = p1.Y;
+	if (p1.X > maxPos.X) maxPos.X = p1.X;
+	if (p1.Y > maxPos.Y) maxPos.Y = p1.Y;
+
+	if (p2.X < minPos.X) minPos.X = p2.X;
+	if (p2.Y < minPos.Y) minPos.Y = p2.Y;
+	if (p2.X > maxPos.X) maxPos.X = p2.X;
+	if (p2.Y > maxPos.Y) maxPos.Y = p2.Y;
+
+	if (p3.X < minPos.X) minPos.X = p3.X;
+	if (p3.Y < minPos.Y) minPos.Y = p3.Y;
+	if (p3.X > maxPos.X) maxPos.X = p3.X;
+	if (p3.Y > maxPos.Y) maxPos.Y = p3.Y;
+
+	Vector3 u = p2 - p1;
+	Vector3 v = p3 - p1;
+	float dotUU = Vector3::Dot(u, u);
+	float dotUV = Vector3::Dot(u, v);
+	float dotVV = Vector3::Dot(v, v);
+	float invDenom = 1.0f / (dotUU * dotVV - dotUV * dotUV);
+
+	IntPoint minPt(minPos);
+	IntPoint maxPt(maxPos);
+
+	for (int x = minPt.X; x < maxPt.X; x++)
 	{
-		for (int j = -nradius + center.Y; j <= nradius + center.Y; j++)
+		for (int y = minPt.Y; y < maxPt.Y; y++)
 		{
-			Vector3 vec((float)i, (float)j);
-			if(Vector3::DistSquared(center, vec)<= nradius*nradius)
-			PutPixel(Vector3((float)i, (float)j) * TRS);
+			IntPoint pt(x, y);
+			Vector3 w = pt.ToVector3() - p1;
+			float dotUW = Vector3::Dot(u, w);
+			float dotVW = Vector3::Dot(v, w);
+			float s = (dotVV * dotUW - dotUV * dotVW) * invDenom;
+			float t = (dotUU * dotVW - dotUV * dotUW) * invDenom;
+			if (s >= 0 && t >= 0 && ((s + t) <= 1))
+			{
+				PutPixel(pt);
+			}
 		}
 	}
 }
@@ -58,68 +97,36 @@ void UpdateFrame(void)
 	// Buffer Clear
 	SetColor(32, 128, 255);
 	Clear();
-
-	// Draw
-
-
-
-	// Draw a filled circle with radius 100
-	Vector3 center(0.0f, 0.0f);
-	float radius = 100.0f;
-	int nradius = (int)radius;
-
-	static float degree = 0;
-	degree += 0.1f;
-	degree = fmodf(degree, 360.0f);
-
-	Matrix3 rotMat;
-	rotMat.SetRotation(degree);
-	rotMat.Transpose();
-
-	float maxScale = 2;
-    float scale = (sinf((Deg2Rad(degree*2))+1) *0.5)* maxScale;
-	Matrix3 scaleMat;
-	scaleMat.SetScale(scale, scale,0);
-
-	float maxPos = 150;
-	float pos = sinf(Deg2Rad(degree)) * maxPos;
-	Matrix3 translationMat;
-	translationMat.SetTranslation(pos, pos);
-
-	Matrix3 SR = scaleMat * rotMat;
-	Matrix3 TRS = translationMat * rotMat * scaleMat;
-
 	
-	static float g = 0;
-	g++;
-	g = fmodf(g, 225);
-	SetColor(255, g, 0);
-	DrawQuad(center,nradius, TRS);
+	static float xPos = 0;
+	static float scale = 1;
+	static float theta = 0;
+	//Input
+	if (GetAsyncKeyState(VK_LEFT)) theta--;
+	if (GetAsyncKeyState(VK_RIGHT)) theta++;
 
-	Matrix3 mat; 
-	mat.SetTranslation(0, 0);
+	if (GetAsyncKeyState(VK_UP)) xPos +=1;
+	if (GetAsyncKeyState(VK_DOWN)) xPos -=1;
 
-	static float de = 360.0f;
-	de -= 0.2f;
-	de = fmodf(de, 360);
-	Matrix3 rotM; rotM.SetRotation(de);
+	if (GetAsyncKeyState(VK_PRIOR)) { scale+=0.01f; }
+	if (GetAsyncKeyState(VK_NEXT)) { scale-=0.01f; }
 
-	static float b = 255;
-	b --;
-	b = fmodf(b, 255);
-	SetColor(0, g, b);
-	center = Vector3(120, 120);
-	DrawCircle(center, 10, TRS*mat*rotM);
+	//Define Matrix
+	Matrix3 tMat;
+	tMat.SetTranslation(xPos, 0);
 
-	center = Vector3(140, 140);
-	
-	static float d = 0;
-	d += 0.5f;
-	d = fmodf(d, 360.0f);
-	Matrix3 rot; rot.SetRotation(d);
-	DrawQuad(center, 2, TRS * mat*rot);
+	Matrix3 sMat;
+	sMat.SetScale(scale,scale,1);
+
+	Matrix3 rMat;
+	rMat.SetRotation(theta);
+
+	Matrix3 TRS = tMat * rMat *sMat;
+	SetColor(255, 0, 0);
 
 	/*
+	float radius = 100.0f;
+	int nradius = (int)radius;
 	for (int i = -nradius; i <= nradius; i++)
 	{
 		for (int j = -nradius; j <= nradius; j++)
@@ -128,6 +135,18 @@ void UpdateFrame(void)
 		}
 	}
 	*/
+
+	/*
+	Vector3 start = Vector3::Make2DPoint(-10, -10) * TRS;
+	Vector3 end = Vector3::Make2DPoint(20, 40)* TRS;
+	DrawLine(start, end,TRS);
+	*/
+
+	Vector3 p1 = Vector3::Make2DPoint(0, 80);
+	Vector3 p2 = Vector3::Make2DPoint(-160, -10);
+	Vector3 p3 = Vector3::Make2DPoint(250, 20);
+	DrawTriangle(p1, p2, p3);
+
 	// Buffer Swap 
 	BufferSwap();
 }
