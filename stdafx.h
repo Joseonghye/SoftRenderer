@@ -27,6 +27,9 @@
 
 #define FORCEINLINE __forceinline	
 
+#define RGBA32(r,g,b,a) ((ULONG)((BYTE)(b)) | (ULONG)(((BYTE)(g)) << 8) | (ULONG)(((BYTE)(r)) << 16) | (ULONG)(((BYTE)(a)) << 24))
+#define RGB32(r,g,b) RGBA32(r, g, b, 255)
+
 //inLine 함수를 호출할때 점프 하는 것이 아니기에 속도가 빠르다 (가볍게만 사용해야함) 
 FORCEINLINE float Deg2Rad(float degree)
 {

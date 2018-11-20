@@ -31,6 +31,12 @@
     <Filter Include="Math\Vector">
       <UniqueIdentifier>{571053ad-4e94-40ce-8cdd-bc6def672207}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Image">
+      <UniqueIdentifier>{f5b40053-8610-4ccd-a0e1-b37818961ade}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Gometry">
+      <UniqueIdentifier>{6091202b-827e-4f14-b176-497091fed718}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -72,6 +78,15 @@
     <ClInclude Include="Vector3.h">
       <Filter>Math\Vector</Filter>
     </ClInclude>
+    <ClInclude Include="Bmp.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Image</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Gometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -98,6 +113,12 @@
     <ClCompile Include="Vector3.cpp">
       <Filter>Math\Vector</Filter>
     </ClCompile>
+    <ClCompile Include="Bmp.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Image</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SoftRenderer.rc">
@@ -109,6 +130,9 @@
       <Filter>리소스 파일</Filter>
     </Image>
     <Image Include="SoftRenderer.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="test.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>
