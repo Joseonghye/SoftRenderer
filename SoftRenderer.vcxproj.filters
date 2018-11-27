@@ -87,6 +87,21 @@
     <ClInclude Include="Vertex.h">
       <Filter>Gometry</Filter>
     </ClInclude>
+    <ClInclude Include="Triangle.h">
+      <Filter>Gometry</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Gometry</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadMesh.h">
+      <Filter>Gometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

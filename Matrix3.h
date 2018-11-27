@@ -1,4 +1,5 @@
 #pragma once
+
 struct Matrix3
 {
 public:
@@ -26,7 +27,7 @@ public:
 		SetIdentity();
 		_11 = intX;
 		_22 = intY;
-		_12 = intZ;
+		_33 = intZ;
 	}
 
 	void SetRotation(float degree)
@@ -39,11 +40,11 @@ public:
 		_22 = _11;
 	}
 
-	void SetTranslation(float intX, float intY)
+	void SetTranslation(float InX, float InY)
 	{
 		SetIdentity();
-		_13 = intX;
-		_31 = intY;
+		_13 = InX;
+		_23 = InY;
 	}
 
 	void Transpose()

@@ -23,6 +23,16 @@ Vector2 Vector2::operator*(const Matrix2 & Mat) const
 	return result;
 }
 
+Vector2 Vector2::operator*(float Scale) const
+{
+	return Vector2(X*Scale, Y*Scale);
+}
+
+Vector2 Vector2::operator+(const Vector2 & V) const
+{
+	return Vector2(X + V.X, Y + V.Y);
+}
+
 bool Vector2::Equals(const Vector2 & V, float tolorance) const //오류 방지용 const
 {
 	return (fabs(X - V.X) <= tolorance) && (fabs(Y - V.Y) <= tolorance);

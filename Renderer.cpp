@@ -7,6 +7,11 @@
 #include "Vertex.h"
 #include "IntPoint.h"
 
+#include "GameObject.h"
+#include "QuadMesh.h"
+#include "Triangle.h"
+#include "Texture.h"
+
 bool IsInRange(int x, int y);
 void PutPixel(int x, int y);
 void DrawTriangle(const Vertex& v1, const Vertex& v2, const Vertex& v3);
@@ -165,74 +170,205 @@ void DrawTriangle(const Vector3&p1, const Vector3& p2, const Vector3&p3)
 	}
 }
 
+
+void DrawGameObject(Texture* texture, const GameObject2D& gameObj)
+{
+	for (int i = 0; i < 2; i++)
+	{
+		Vertex  vt[3];
+		vt[0]= gameObj.Mesh.Triangles[i].vt[0];
+		vt[0].position = vt[0].position* gameObj.Transform.TRS;
+		vt[1]= gameObj.Mesh.Triangles[i].vt[1];
+		vt[1].position = vt[1].position* gameObj.Transform.TRS;
+		vt[2] = gameObj.Mesh.Triangles[i].vt[2];
+		vt[2].position = vt[2].position* gameObj.Transform.TRS;
+
+		Vector2 minPos = Vector2(INFINITY, INFINITY);
+		Vector2 maxPos = Vector2(-INFINITY, -INFINITY);
+		for (int j = 0; j < 3; j++)
+		{
+			float x = vt[j].position.X;
+			float y = vt[j].position.Y;
+			if (x < minPos.X) minPos.X = x;
+			if (y< minPos.Y) minPos.Y = y;
+			if (x > maxPos.X) maxPos.X = x;
+			if (y> maxPos.Y) maxPos.Y = y;
+		}
+
+		Vector3 u = vt[1].position - vt[0].position;
+		Vector3 v = vt[2].position - vt[0].position;
+		float dotUU = Vector3::Dot(u, u);
+		float dotUV = Vector3::Dot(u, v);
+		float dotVV = Vector3::Dot(v, v);
+		float invDenom = 1.0f / (dotUU * dotVV - dotUV * dotUV);
+
+		IntPoint minPt(minPos);
+		IntPoint maxPt(maxPos);
+
+		for (int x = minPt.X; x < maxPt.X; x++)
+		{
+			for (int y = minPt.Y; y < maxPt.Y; y++)
+			{
+				IntPoint pt(x, y);
+				Vector3 w = pt.ToVector3() - vt[0].position;
+				float dotUW = Vector3::Dot(u, w);
+				float dotVW = Vector3::Dot(v, w);
+				float s = (dotVV * dotUW - dotUV * dotVW) * invDenom;
+				float t = (dotUU * dotVW - dotUV * dotUW) * invDenom;
+				if (s >= 0 && t >= 0 && ((s + t) <= 1))
+				{
+					if (texture->IsLoaded()) {
+						Vector2 baryUV = vt[0].uv * (1 - s - t) + vt[1].uv * s + vt[2].uv * t;
+						texture->GetTexturePixel(baryUV);
+						
+						BYTE RV1 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+						BYTE RV2 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+						BYTE RV3 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+
+						BYTE GV1 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+						BYTE GV2 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+						BYTE GV3 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+
+						BYTE BV1 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+						BYTE BV2 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+						BYTE BV3 = GetRValue(texture->GetTexturePixel(baryUV)*0.125);
+
+						BYTE FinalR = (BYTE)(RV1 * (1 - s - t) + RV2 * s + RV3 * t);
+						BYTE FinalG = (BYTE)(GV1 * (1 - s - t) + GV2 * s + GV3 * t);
+						BYTE FinalB = (BYTE)(BV1 * (1 - s - t) + BV2 * s + BV3 * t);
+
+						SetColor(FinalR, FinalG, FinalB);
+
+					}
+					else 
+					{
+						BYTE RV1 = GetRValue(vt[0].color);
+						BYTE RV2 = GetRValue(vt[1].color);
+						BYTE RV3 = GetRValue(vt[2].color);
+
+						BYTE GV1 = GetGValue(vt[0].color);
+						BYTE GV2 = GetGValue(vt[1].color);
+						BYTE GV3 = GetGValue(vt[2].color);
+
+						BYTE BV1 = GetBValue(vt[0].color);
+						BYTE BV2 = GetBValue(vt[1].color);
+						BYTE BV3 = GetBValue(vt[2].color);
+
+						BYTE FinalR = (BYTE)(RV1 * (1 - s - t) + RV2 * s + RV3 * t);
+						BYTE FinalG = (BYTE)(GV1 * (1 - s - t) + GV2 * s + GV3 * t);
+						BYTE FinalB = (BYTE)(BV1 * (1 - s - t) + BV2 * s + BV3 * t);
+
+						SetColor(FinalR, FinalG, FinalB);
+					}
+					PutPixel(pt);
+				}
+			}
+		}
+	}
+}
+
 void UpdateFrame(void)
 {
 	// Buffer Clear
 	SetColor(32, 128, 255);
 	Clear();
 	
-	static float xPos = 0;
-	static float scale = 1;
-	static float theta = 0;
-	//Input
-	if (GetAsyncKeyState(VK_LEFT)) theta--;
-	if (GetAsyncKeyState(VK_RIGHT)) theta++;
-
-	if (GetAsyncKeyState(VK_UP)) xPos +=1;
-	if (GetAsyncKeyState(VK_DOWN)) xPos -=1;
-
-	if (GetAsyncKeyState(VK_PRIOR)) { scale+=0.01f; }
-	if (GetAsyncKeyState(VK_NEXT)) { scale-=0.01f; }
-
-	//Define Matrix
-	Matrix3 tMat;
-	tMat.SetTranslation(xPos, 0);
-
-	Matrix3 sMat;
-	sMat.SetScale(scale,scale,1);
-
-	Matrix3 rMat;
-	rMat.SetRotation(theta);
-
-	Matrix3 TRS = tMat * rMat *sMat;
+	static Vector2 center;
+	static float angle = 0;
+	static Vector2 scale(1,1);
 	
+	if (GetAsyncKeyState(VK_RIGHT)) center.X++;
+	if (GetAsyncKeyState(VK_LEFT)) center.X--;
 
-	/*
-	float radius = 100.0f;
-	int nradius = (int)radius;
-	for (int i = -nradius; i <= nradius; i++)
-	{
-		for (int j = -nradius; j <= nradius; j++)
-		{
-			PutPixel(Vector3((float)i, (float)j) * TRS);
-		}
-	}
-	*/
+	if (GetAsyncKeyState(VK_LCONTROL)) angle--;
+	if (GetAsyncKeyState(VK_RCONTROL)) angle++;
 
-	/*
-	Vector3 start = Vector3::Make2DPoint(-10, -10) * TRS;
-	Vector3 end = Vector3::Make2DPoint(20, 40)* TRS;
-	DrawLine(start, end,TRS);
-	*/
+	if (GetAsyncKeyState(VK_PRIOR)) { scale.X += 0.01f; scale.Y += 0.01f; }
+	if (GetAsyncKeyState(VK_NEXT)) { scale.X -= 0.01f; scale.Y -= 0.01f; }
+
+	Transform2D trans(center, angle, scale);
 
 	Vector3 p1 = Vector3::Make2DPoint(-80, -80);
 	Vector3 p2 = Vector3::Make2DPoint(-80, 80);
 	Vector3 p3 = Vector3::Make2DPoint(80, 80);
 	Vector3 p4 = Vector3::Make2DPoint(80, -80);
-	/*
-	SetColor(255, 0, 0);
-	DrawTriangle(p1, p2, p3);
 
-	SetColor(255, 255, 0);
-	DrawTriangle(p1, p3, p4);*/
+	Vertex v1(p1,RGB32(255,0,0),Vector2(0,1));
+	Vertex v2(p2,RGB32(0,0,0), Vector2(0, 0));
+	Vertex v3(p3,RGB32(0,0,255), Vector2(1, 1));
+	Vertex v4(p4,RGB32(0,0,0), Vector2(1, 0));
 
-	Vertex v1 = Vertex(p1, RGB32(255, 0, 0));
-	Vertex v2 = Vertex(p2, RGB32(0, 255, 0));
-	Vertex v3 = Vertex(p3, RGB32(0, 0, 255));
-	Vertex v4 = Vertex(p4, RGB32(255, 255, 255));
+	Triangle t1(v1,v2,v3);
+	Triangle t2(v1, v3, v4);
+
+	Mesh m(t1, t2);
+
+	GameObject2D obj(trans,m);
+
+	DrawGameObject(g_Texture, obj);
+
+	//static float xPos = 0;
+	//static float scale = 1;
+	//static float theta = 0;
+	//Input
+	//if (GetAsyncKeyState(VK_LEFT)) theta--;
+	//if (GetAsyncKeyState(VK_RIGHT)) theta++;
+
+	//if (GetAsyncKeyState(VK_UP)) xPos +=1;
+	//if (GetAsyncKeyState(VK_DOWN)) xPos -=1;
+
+	//if (GetAsyncKeyState(VK_PRIOR)) { scale+=0.01f; }
+	//if (GetAsyncKeyState(VK_NEXT)) { scale-=0.01f; }
+
+	//Define Matrix
+	//Matrix3 tMat;
+	//tMat.SetTranslation(xPos, 0);
+
+	//Matrix3 sMat;
+	//sMat.SetScale(scale,scale,1);
+
+	//Matrix3 rMat;
+	//rMat.SetRotation(theta);
+
+	//Matrix3 TRS = tMat * rMat *sMat;
+	//
+
+	///*
+	//float radius = 100.0f;
+	//int nradius = (int)radius;
+	//for (int i = -nradius; i <= nradius; i++)
+	//{
+	//	for (int j = -nradius; j <= nradius; j++)
+	//	{
+	//		PutPixel(Vector3((float)i, (float)j) * TRS);
+	//	}
+	//}
+	//*/
+
+	///*
+	//Vector3 start = Vector3::Make2DPoint(-10, -10) * TRS;
+	//Vector3 end = Vector3::Make2DPoint(20, 40)* TRS;
+	//DrawLine(start, end,TRS);
+	//*/
+
+	//Vector3 p1 = Vector3::Make2DPoint(-80, -80);
+	//Vector3 p2 = Vector3::Make2DPoint(-80, 80);
+	//Vector3 p3 = Vector3::Make2DPoint(80, 80);
+	//Vector3 p4 = Vector3::Make2DPoint(80, -80);
+	///*
 	//SetColor(255, 0, 0);
-	DrawTriangle(v1, v2, v3);
-	DrawTriangle(v1, v3, v4);
+	//DrawTriangle(p1, p2, p3);
+
+	//SetColor(255, 255, 0);
+	//DrawTriangle(p1, p3, p4);*/
+
+	//Vertex v1 = Vertex(p1, RGB32(255, 0, 0));
+	//Vertex v2 = Vertex(p2, RGB32(0, 255, 0));
+	//Vertex v3 = Vertex(p3, RGB32(0, 0, 255));
+	//Vertex v4 = Vertex(p4, RGB32(255, 255, 255));
+	//SetColor(255, 0, 0);
+	//DrawTriangle(v1, v2, v3);
+	//DrawTriangle(v1, v3, v4);
 
 	// Buffer Swap 
 	BufferSwap();
