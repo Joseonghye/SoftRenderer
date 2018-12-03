@@ -5,13 +5,11 @@
 struct Mesh 
 {
 public:
-	Mesh() {}
-	Mesh(Triangle t1, Triangle t2) {
-		Triangles[0] = t1;
-		Triangles[1] = t2;
-	}
+	Mesh(): Triangles(NULL), Length(0) {}
+	Mesh(Triangle _triangles[], int _length):Triangles(_triangles),Length(_length){}
 
 public:
-	Triangle Triangles[2];
+	Triangle* Triangles;
+	int Length;
 
 };

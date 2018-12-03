@@ -12,4 +12,5 @@ struct GameObject2D
 public:
 	Transform2D Transform;
 	Mesh Mesh;
+
 };
