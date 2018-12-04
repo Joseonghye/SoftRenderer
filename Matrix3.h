@@ -47,6 +47,13 @@ public:
 		_23 = InY;
 	}
 
+	void SetInverseTranslation(float InX, float InY)
+	{
+		SetIdentity();
+		_13 = -InX;
+		_23 = -InY;
+	}
+
 	void Transpose()
 	{
 		float temp = _12;
@@ -56,6 +63,7 @@ public:
 		_13 = _31;
 		_31 = temp;
 	}
+
 
 	Matrix3 operator*(const Matrix3& Mat) const;
 };
